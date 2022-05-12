@@ -67,9 +67,12 @@ installed.
 Install necessary software:
 
 ```bash
+apt update
+apt install -y sudo
+
 if command -v apt-get &> /dev/null; then
   sudo apt update -qq
-  sudo apt-get install -y -qq curl git jq sudo unzip > /dev/null
+  sudo apt-get install -y -qq curl git jq unzip > /dev/null
 fi
 ```
 

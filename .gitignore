@@ -6,3 +6,6 @@
 
 # mdbook generated files
 docs/book
+
+# tmp directory
+tmp/

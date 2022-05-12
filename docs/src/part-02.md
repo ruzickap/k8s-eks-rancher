@@ -102,7 +102,7 @@ iam:
       wellKnownPolicies:
         ebsCSIController: true
 karpenter:
-  version: 0.10.0
+  version: 0.6.5                    # eksctl currently only supports up to 0.6.*
   createServiceAccount: true
 managedNodeGroups:
   - name: ${CLUSTER_NAME}-ng
@@ -126,6 +126,42 @@ if [[ ! -s "${KUBECONFIG}" ]] ; then
     eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
   fi
 fi
+```
+
+## Configure Karpenter
+
+```bash
+kubectl apply -f - << EOF
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default
+spec:
+  requirements:
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["on-demand"]
+  limits:
+    resources:
+      cpu: 1000
+  provider:
+    instanceProfile: eksctl-KarpenterNodeInstanceProfile-${CLUSTER_NAME}
+    subnetSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    securityGroupSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    amiFamily: Bottlerocket
+    blockDeviceMappings:
+      - deviceName: /dev/xvda
+        ebs:
+          volumeSize: 2Gi
+          volumeType: gp3
+      - deviceName: /dev/xvdb
+        ebs:
+          volumeSize: 10Gi
+          volumeType: gp3
+  ttlSecondsAfterEmpty: 30
+EOF
 ```
 
 ## Post installation tasks
