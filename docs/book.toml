@@ -1,0 +1,19 @@
+[book]
+title = "Amazon EKS with Rancher"
+language = "en"
+description = "Few notes about Amazon EKS installation and Rancher"
+authors = ["Petr Ruzicka"]
+
+[output.html]
+additional-css = ["theme/css/custom.css"]
+edit-url-template = "https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/{path}"
+git-repository-url = "https://github.com/ruzickap/k8s-eks-rancher"
+site-url = "/k8s-eks-rancher/"
+
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]
+
+[preprocessor.open-on-gh]
+command = "mdbook-open-on-gh"
+renderer = ["html"]
