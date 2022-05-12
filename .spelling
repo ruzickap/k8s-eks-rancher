@@ -1,6 +1,7 @@
 Ansible
 CloudFlare
 CloudFormation
+Karpenter
 Kubernetes
 Route53
 awscli
