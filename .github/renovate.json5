@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "branchPrefix": "renovate/",
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"],
+    },
+    {
+      "matchUpdateTypes": ["minor","patch"],
+      "addLabels": ["automerge"],
+      "automerge": true,
+    },
+  ],
+  "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
+  "rebaseWhen": "behind-base-branch",
+  "separateMinorPatch": true,
+}

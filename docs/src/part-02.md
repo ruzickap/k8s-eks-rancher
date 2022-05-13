@@ -102,8 +102,13 @@ iam:
       wellKnownPolicies:
         ebsCSIController: true
 karpenter:
-  version: 0.6.5                    # eksctl currently only supports up to 0.6.*
+  version: 0.9.1
   createServiceAccount: true
+addons:
+  - name: vpc-cni
+  - name: kube-proxy
+  - name: coredns
+  - name: aws-ebs-csi-driver
 managedNodeGroups:
   - name: ${CLUSTER_NAME}-ng
     amiFamily: Bottlerocket
@@ -135,22 +140,42 @@ kubectl apply -f - << EOF
 apiVersion: karpenter.sh/v1alpha5
 kind: Provisioner
 metadata:
-  name: default
+  name: ${CLUSTER_FQDN//./-}
 spec:
   requirements:
     - key: karpenter.sh/capacity-type
       operator: In
       values: ["on-demand"]
+    - key: node.kubernetes.io/instance-type
+      operator: In
+      values: ["t3.micro"]
+    - key: "topology.kubernetes.io/zone"
+      operator: In
+      values: ["${AWS_DEFAULT_REGION}a", "${AWS_DEFAULT_REGION}b", "${AWS_DEFAULT_REGION}c"]
   limits:
     resources:
       cpu: 1000
   provider:
+    amiFamily: Bottlerocket
+    blockDeviceMappings:
+      - deviceName: /dev/xvda
+        ebs:
+          volumeSize: 3Gi
+          volumeType: gp3
+          encrypted: true
+      - deviceName: /dev/xvdb
+        ebs:
+          volumeSize: 20Gi
+          volumeType: gp3
+          encrypted: true
     instanceProfile: eksctl-KarpenterNodeInstanceProfile-${CLUSTER_NAME}
     subnetSelector:
       karpenter.sh/discovery: ${CLUSTER_NAME}
     securityGroupSelector:
       karpenter.sh/discovery: ${CLUSTER_NAME}
-    amiFamily: Bottlerocket
+    tags:
+      Name: ${CLUSTER_FQDN}-karpenter
+$(echo "${TAGS}" | sed "s/ /\\n      /g; s/^/      /g; s/=/: /g")
   ttlSecondsAfterEmpty: 30
 EOF
 ```
