@@ -10,7 +10,7 @@ Install necessary software:
 ```bash
 if command -v apt-get &> /dev/null; then
   apt update -qq
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl jq unzip > /dev/null
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl jq sudo unzip > /dev/null
 fi
 ```
 
@@ -18,7 +18,7 @@ Install [eksctl](https://eksctl.io/):
 
 ```bash
 if ! command -v eksctl &> /dev/null; then
-  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.71.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.97.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
 
@@ -51,6 +51,7 @@ export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
 export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
 # AWS Region
 export AWS_DEFAULT_REGION="eu-central-1"
+export AWS_PAGER=""
 
 : "${AWS_ACCESS_KEY_ID?}"
 : "${AWS_DEFAULT_REGION?}"
@@ -68,6 +69,36 @@ if eksctl get cluster --name="${CLUSTER_NAME}" 2>/dev/null ; then
   eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
   eksctl delete cluster --name="${CLUSTER_NAME}" --force
 fi
+```
+
+Remove orphan EC2 created by Karpenter:
+
+```bash
+EC2S=$(aws ec2 describe-instances --filter "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" --query "Reservations[].Instances[].InstanceId"  --output text) && \
+for EC2 in ${EC2S}; do
+  echo "Removing EC2: ${EC2}"
+  aws ec2 terminate-instances --instance-ids "${EC2}"
+done
+```
+
+Remove orphan ELBs, NLBs (if exists):
+
+```bash
+# Remove Network ELBs
+for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
+  if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+    echo "💊 Deleting Network ELB: ${NETWORK_ELB_ARN}"
+    aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
+  fi
+done
+
+# Remove Classic ELBs
+for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
+  if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+    echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
+    aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
+  fi
+done
 ```
 
 Remove Route 53 DNS records from DNS Zone:
@@ -104,26 +135,6 @@ SNAPSHOTS=$(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUST
 for SNAPSHOT in ${SNAPSHOTS}; do
   echo "Removing Snapshot: ${SNAPSHOT}"
   aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
-done
-```
-
-Remove orphan ELBs, NLBs (if exists):
-
-```bash
-# Remove Network ELBs
-for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
-  if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-    echo "💊 Deleting Network ELB: ${NETWORK_ELB_ARN}"
-    aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
-  fi
-done
-
-# Remove Classic ELBs
-for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
-  if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-    echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
-    aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
-  fi
 done
 ```
 
