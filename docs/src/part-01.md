@@ -16,7 +16,7 @@ clusters. The cluster names will look like `CLUSTER_NAME`.`BASE_DOMAIN`
 export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
 export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
 export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
-export KUBECONFIG=${PWD}/tmp/kubeconfig-${CLUSTER_NAME}.conf
+export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
 export MY_EMAIL="petr.ruzicka@gmail.com"
 export ENVIRONMENT="dev"
 export LETSENCRYPT_ENVIRONMENT="staging"
@@ -67,9 +67,6 @@ installed.
 Install necessary software:
 
 ```bash
-apt update
-apt install -y sudo
-
 if command -v apt-get &> /dev/null; then
   sudo apt update -qq
   sudo apt-get install -y -qq curl git jq unzip > /dev/null
@@ -121,7 +118,6 @@ fi
 Create DNS zone for EKS clusters:
 
 ```shell
-export BASE_DOMAIN="k8s.use1.dev.proj.aws.mylabs.dev"
 export CLOUDFLARE_EMAIL="petr.ruzicka@gmail.com"
 export CLOUDFLARE_API_KEY="11234567890"
 

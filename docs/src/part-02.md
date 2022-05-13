@@ -151,15 +151,6 @@ spec:
     securityGroupSelector:
       karpenter.sh/discovery: ${CLUSTER_NAME}
     amiFamily: Bottlerocket
-    blockDeviceMappings:
-      - deviceName: /dev/xvda
-        ebs:
-          volumeSize: 2Gi
-          volumeType: gp3
-      - deviceName: /dev/xvdb
-        ebs:
-          volumeSize: 10Gi
-          volumeType: gp3
   ttlSecondsAfterEmpty: 30
 EOF
 ```

@@ -1,8 +1,10 @@
 Ansible
 CloudFlare
 CloudFormation
+ELBs
 Karpenter
 Kubernetes
+NLBs
 Route53
 awscli
 eksctl
