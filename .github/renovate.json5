@@ -15,5 +15,13 @@
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
   "rebaseWhen": "behind-base-branch",
+  "regexManagers": [
+    {
+      // https://github.com/renovatebot/renovate/discussions/14366
+      "fileMatch": [ "^docs/src/part-.*\\.md$" ],
+      "matchStrings": [ "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)(?: lookupName=(?<lookupName>.+?))?(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?_VERSION=\"?(?<currentValue>.+?)\"?\\s" ],
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+    },
+  ],
   "separateMinorPatch": true,
 }
