@@ -31,6 +31,7 @@ You will need to configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/user
 and other secrets/variables.
 
 ```shell
+export MY_PASSWORD="xxxxxxxx"
 # AWS Credentials
 export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -50,6 +51,7 @@ Verify if all the necessary variables were set:
 : "${KUBECONFIG?}"
 : "${LETSENCRYPT_ENVIRONMENT?}"
 : "${MY_EMAIL?}"
+: "${MY_PASSWORD}"
 : "${TAGS?}"
 ```
 
@@ -100,7 +102,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubectl lookupName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.24.0"
+  KUBECTL_VERSION="1.23.6"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi

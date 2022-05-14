@@ -22,6 +22,11 @@
       "matchStrings": [ "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)(?: lookupName=(?<lookupName>.+?))?(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?_VERSION=\"?(?<currentValue>.+?)\"?\\s" ],
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
     },
+    {
+      "fileMatch": [ "^docs/src/part-.*\\.md$" ],
+      "matchStrings": [ "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)(?: lookupName=(?<lookupName>.+?))?(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?version: \"?(?<currentValue>.+?)\"?\\s" ],
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+    },
   ],
   "separateMinorPatch": true,
 }

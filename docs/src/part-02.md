@@ -102,7 +102,8 @@ iam:
       wellKnownPolicies:
         ebsCSIController: true
 karpenter:
-  version: 0.9.1
+  # renovate: datasource=github-tags depName=karpenter lookupName=aws/karpenter
+  version: 0.9.0
   createServiceAccount: true
 addons:
   - name: vpc-cni
@@ -146,9 +147,6 @@ spec:
     - key: karpenter.sh/capacity-type
       operator: In
       values: ["on-demand"]
-    - key: node.kubernetes.io/instance-type
-      operator: In
-      values: ["t3.micro"]
     - key: "topology.kubernetes.io/zone"
       operator: In
       values: ["${AWS_DEFAULT_REGION}a", "${AWS_DEFAULT_REGION}b", "${AWS_DEFAULT_REGION}c"]
