@@ -19,7 +19,7 @@ Install [eksctl](https://eksctl.io/):
 ```bash
 if ! command -v eksctl &> /dev/null; then
   # renovate: datasource=github-tags depName=eksctl lookupName=weaveworks/eksctl
-  EKSCTL_VERSION="0.95.0"
+  EKSCTL_VERSION="0.97.0"
   curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
