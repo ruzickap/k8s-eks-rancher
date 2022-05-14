@@ -18,7 +18,9 @@ Install [eksctl](https://eksctl.io/):
 
 ```bash
 if ! command -v eksctl &> /dev/null; then
-  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.97.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+  # renovate: datasource=github-tags depName=eksctl lookupName=weaveworks/eksctl
+  EKSCTL_VERSION="0.95.0"
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
 
@@ -26,8 +28,10 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 
 ```bash
 if ! command -v aws &> /dev/null; then
-  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-  unzip -q -o /tmp/awscliv2.zip -d /tmp/
+  # renovate: datasource=github-tags depName=awscli lookupName=aws/aws-cli
+  AWSCLI_VERSION="2.6.1"
+  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
+  unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
 fi
 ```
@@ -36,7 +40,9 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 
 ```bash
 if ! command -v kubectl &> /dev/null; then
-  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v1.21.5/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+  # renovate: datasource=github-tags depName=kubectl lookupName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+  KUBECTL_VERSION="1.22.8"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
 ```
