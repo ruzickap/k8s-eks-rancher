@@ -31,6 +31,7 @@ You will need to configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/user
 and other secrets/variables.
 
 ```shell
+export MY_PASSWORD="xxxxxxxx"
 # AWS Credentials
 export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -50,6 +51,7 @@ Verify if all the necessary variables were set:
 : "${KUBECONFIG?}"
 : "${LETSENCRYPT_ENVIRONMENT?}"
 : "${MY_EMAIL?}"
+: "${MY_PASSWORD}"
 : "${TAGS?}"
 ```
 
@@ -77,7 +79,7 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 
 ```bash
 if ! command -v aws &> /dev/null; then
-  # renovate: datasource=github-tags depName=awscli lookupName=aws/aws-cli
+  # renovate: datasource=github-tags depName=awscli packageName=aws/aws-cli
   AWSCLI_VERSION="2.7.1"
   curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
   unzip -q -o /tmp/awscli.zip -d /tmp/
@@ -89,7 +91,7 @@ Install [eksctl](https://eksctl.io/):
 
 ```bash
 if ! command -v eksctl &> /dev/null; then
-  # renovate: datasource=github-tags depName=eksctl lookupName=weaveworks/eksctl
+  # renovate: datasource=github-tags depName=eksctl packageName=weaveworks/eksctl
   EKSCTL_VERSION="0.97.0"
   curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
@@ -99,8 +101,8 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 
 ```bash
 if ! command -v kubectl &> /dev/null; then
-  # renovate: datasource=github-tags depName=kubectl lookupName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.24.0"
+  # renovate: datasource=github-tags depName=kubectl packageName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+  KUBECTL_VERSION="1.23.4"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
@@ -110,7 +112,7 @@ Install [Helm](https://helm.sh/):
 
 ```bash
 if ! command -v helm &> /dev/null; then
-  # renovate: datasource=github-tags depName=helm lookupName=helm/helm
+  # renovate: datasource=github-tags depName=helm packageName=helm/helm
   HELM_VERSION="3.9.0"
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
