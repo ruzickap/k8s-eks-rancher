@@ -5,12 +5,57 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["major"],
-      "addLabels": ["major"],
+      "addLabels": ["renovate/major"],
     },
     {
-      "matchUpdateTypes": ["minor","patch"],
-      "addLabels": ["automerge"],
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["renovate/minor"],
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "ignoreTests": true,
+      "automergeType": "branch",
       "automerge": true,
+    },
+
+    {
+      "description": "autoMerge eksctl",
+      "matchPackageNames": ["eksctl"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "ignoreTests": true,
+      "automergeType": "branch",
+      "automerge": true,
+    },
+
+    {
+      "description": "autoMerge only patch releases for karpenter due to eksctl support",
+      "matchPackageNames": ["karpenter"],
+      "matchUpdateTypes": ["patch"],
+      "ignoreTests": true,
+      "automergeType": "branch",
+      "automerge": true,
+    },
+    {
+      "matchPackageNames": ["karpenter"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+
+    // This should be removed once the issue will be fixed...
+    {
+      "description": "autoMerge only patch releases for kubectl due issue: https://github.com/aws/aws-cli/issues/6920",
+      "matchPackageNames": ["kubectl"],
+      "matchUpdateTypes": ["patch"],
+      "ignoreTests": true,
+      "automergeType": "branch",
+      "automerge": true,
+    },
+    {
+      "matchDatasources": ["github-tags"],
+      "matchManagers": [ "regex" ],
+      "matchPackageNames": ["kubectl"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false,
     },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
@@ -19,8 +64,11 @@
     {
       // https://github.com/renovatebot/renovate/discussions/14366
       "fileMatch": [ "^docs/src/part-.*\\.md$" ],
-      "matchStrings": [ "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)(?: lookupName=(?<lookupName>.+?))?(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?_VERSION=\"?(?<currentValue>.+?)\"?\\s" ],
-      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}"
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?_VERSION=\"?(?<currentValue>.+?)\"?\\s",
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)(?: extractVersion=(?<extractVersion>.+?))?\\s*.*?version:\\s+\"?(?<currentValue>.+?)\"?\\s",
+      ],
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",
     },
   ],
   "separateMinorPatch": true,
