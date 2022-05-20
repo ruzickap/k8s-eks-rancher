@@ -1,6 +1,7 @@
 Ansible
 CloudFlare
 CloudFormation
+ClusterIssuers
 ConfigMap
 ELBs
 Karpenter
@@ -9,5 +10,7 @@ NLBs
 Route53
 awscli
 eksctl
+external-dns
+ingress-nginx
 kubectl
 nameservers
