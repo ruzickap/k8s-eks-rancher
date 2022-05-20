@@ -21,7 +21,7 @@ export MY_EMAIL="petr.ruzicka@gmail.com"
 export ENVIRONMENT="dev"
 export LETSENCRYPT_ENVIRONMENT="staging"
 # AWS Region
-export AWS_DEFAULT_REGION="eu-central-1"
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 # Tags used to tag the AWS resources
 export TAGS="Owner=${MY_EMAIL} Environment=${ENVIRONMENT} Group=Cloud_Native Squad=Cloud_Container_Platform"
 echo -e "${MY_EMAIL} | ${CLUSTER_NAME} | ${BASE_DOMAIN} | ${CLUSTER_FQDN}\n${TAGS}"
