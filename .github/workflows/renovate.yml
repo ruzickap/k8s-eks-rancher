@@ -26,7 +26,7 @@ on:
     paths:
       - ".github/renovate.json5"
   schedule:
-    - cron: "2 2 * * *"
+    - cron: "8 * * * *"
 
 env:
   LOG_LEVEL: info
