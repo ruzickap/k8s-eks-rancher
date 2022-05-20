@@ -2,13 +2,18 @@
 
 set -euxo pipefail
 
-docker run -it --rm \
+export CI="${CI:-false}"
+
+if [[ "${CI}" = "true" ]]; then
+  DOCKER_CLI_PARAMS=( "-i" "--rm" )
+else
+  DOCKER_CLI_PARAMS=( "-i" "-t" "--rm" )
+fi
+
+docker run "${DOCKER_CLI_PARAMS[@]}" \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
   -e AWS_SESSION_TOKEN \
   -v "${PWD}:/mnt" \
   -w /mnt \
-  ubuntu \
-  bash -euo pipefail -c " \
-    ./delete-k8s-eks-rancher.sh \;
-  "
+  ubuntu ./delete-k8s-eks-rancher.sh
