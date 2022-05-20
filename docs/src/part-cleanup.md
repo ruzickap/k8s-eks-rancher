@@ -73,7 +73,7 @@ Remove EKS cluster and created components:
 ```bash
 if eksctl get cluster --name="${CLUSTER_NAME}" 2>/dev/null ; then
   eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-  eksctl delete cluster --name="${CLUSTER_NAME}" --force
+  eksctl delete cluster --name="${CLUSTER_NAME}" --force --wait
 fi
 ```
 
@@ -142,6 +142,12 @@ for SNAPSHOT in ${SNAPSHOTS}; do
   echo "Removing Snapshot: ${SNAPSHOT}"
   aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
 done
+```
+
+Wait for all CloudFormation stacks to be deleted:
+
+```bash
+aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_NAME}-route53"
 ```
 
 Remove `tmp/${CLUSTER_FQDN}` directory:
