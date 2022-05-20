@@ -11,8 +11,11 @@ and modify the
 Service account `cert-manager` was created by `eksctl`.
 
 ```bash
+# renovate: datasource=helm depName=cert-manager packageName=cert-manager registryUrl=https://charts.jetstack.io
+CERT_MANAGER_HELM_CHART_VERSION="v1.7.0"
+
 helm repo add --force-update jetstack https://charts.jetstack.io
-helm upgrade --install --version v1.7.0 --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager << EOF
+helm upgrade --install --version "${CERT_MANAGER_HELM_CHART_VERSION}" --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager << EOF
 installCRDs: true
 serviceAccount:
   create: false
@@ -42,8 +45,11 @@ and modify the
 [default values](https://github.com/rancher/rancher/blob/master/chart/values.yaml).
 
 ```bash
+# renovate: datasource=helm depName=rancher packageName=rancher registryUrl=https://releases.rancher.com/server-charts/latest
+RANCHER_HELM_CHART_VERSION="2.6.4"
+
 helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
-helm upgrade --install --version 2.6.4 --namespace cattle-system --wait --values - rancher rancher-latest/rancher << EOF
+helm upgrade --install --version "v${RANCHER_HELM_CHART_VERSION}" --namespace cattle-system --wait --values - rancher rancher-latest/rancher << EOF
 hostname: rancher.${CLUSTER_FQDN}
 ingress:
   tls:

@@ -1,6 +1,7 @@
 Ansible
 CloudFlare
 CloudFormation
+ConfigMap
 ELBs
 Karpenter
 Kubernetes

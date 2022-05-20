@@ -136,6 +136,28 @@ fi
 aws eks update-kubeconfig --name="${CLUSTER_NAME}"
 ```
 
+<aside class="note">
+
+<h1>Note</h1>
+
+The following step is not mandatory (it is recommended)
+
+</aside>
+
+Add add the user or role to the `aws-auth` ConfigMap. This is handy if you are
+using different user for CLI operations and different user/role for accessing
+the AWS Console to see EKS Workloads in Cluster's tab.
+
+```bash
+if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" &> /dev/null ; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" --group system:masters --username admin
+fi
+
+if [[ -n ${AWS_USER_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" &> /dev/null ; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" --group system:masters --username admin
+fi
+```
+
 ## Configure Karpenter
 
 ```bash
