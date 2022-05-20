@@ -51,7 +51,6 @@
       "automerge": true,
     },
     {
-      "matchDatasources": ["github-tags"],
       "matchManagers": [ "regex" ],
       "matchPackageNames": ["kubectl"],
       "matchUpdateTypes": ["major", "minor"],

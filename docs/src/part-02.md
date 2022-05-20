@@ -132,6 +132,8 @@ if [[ ! -s "${KUBECONFIG}" ]] ; then
     eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
   fi
 fi
+
+aws eks update-kubeconfig --name="${CLUSTER_NAME}"
 ```
 
 ## Configure Karpenter
