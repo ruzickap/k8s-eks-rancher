@@ -96,11 +96,6 @@ iam:
         namespace: external-dns
       wellKnownPolicies:
         externalDNS: true
-    - metadata:
-        name: ebs-csi-controller-sa
-        namespace: aws-ebs-csi-driver
-      wellKnownPolicies:
-        ebsCSIController: true
 karpenter:
   # renovate: datasource=github-tags depName=karpenter packageName=aws/karpenter
   version: 0.9.1
@@ -140,7 +135,7 @@ aws eks update-kubeconfig --name="${CLUSTER_NAME}"
 
 <h1>Note</h1>
 
-The following step is not mandatory (it is recommended)
+The following step is not mandatory (it is recommended)...
 
 </aside>
 

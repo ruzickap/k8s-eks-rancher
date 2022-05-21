@@ -12,30 +12,29 @@ clusters. The cluster names will look like `CLUSTER_NAME`.`BASE_DOMAIN`
 (`kube1.k8s.mylabs.dev`).
 
 ```bash
-# Hostname / FQDN definitions
-export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
-export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
-export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
-export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
-export MY_EMAIL="petr.ruzicka@gmail.com"
-export ENVIRONMENT="dev"
-export LETSENCRYPT_ENVIRONMENT="staging"
 # AWS Region
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
+# Hostname / FQDN definitions
+export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
+export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
+export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
+export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
+export LETSENCRYPT_ENVIRONMENT="staging"
+export MY_EMAIL="petr.ruzicka@gmail.com"
 # Tags used to tag the AWS resources
-export TAGS="Owner=${MY_EMAIL} Environment=${ENVIRONMENT} Group=Cloud_Native Squad=Cloud_Container_Platform"
-echo -e "${MY_EMAIL} | ${CLUSTER_NAME} | ${BASE_DOMAIN} | ${CLUSTER_FQDN}\n${TAGS}"
+export TAGS="Owner=${MY_EMAIL} Environment=dev Group=Cloud_Native Squad=Cloud_Container_Platform"
 ```
 
 You will need to configure [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
 and other secrets/variables.
 
 ```shell
-export MY_PASSWORD="xxxxxxxx"
 # AWS Credentials
 export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-#export AWS_SESSION_TOKEN="....."
+# Rancher password
+export MY_PASSWORD="xxxxxxxx"
+# export AWS_SESSION_TOKEN="....."
 ```
 
 Verify if all the necessary variables were set:
@@ -47,12 +46,13 @@ Verify if all the necessary variables were set:
 : "${BASE_DOMAIN?}"
 : "${CLUSTER_FQDN?}"
 : "${CLUSTER_NAME?}"
-: "${ENVIRONMENT?}"
 : "${KUBECONFIG?}"
 : "${LETSENCRYPT_ENVIRONMENT?}"
 : "${MY_EMAIL?}"
 : "${MY_PASSWORD}"
 : "${TAGS?}"
+
+echo -e "${MY_EMAIL} | ${CLUSTER_NAME} | ${BASE_DOMAIN} | ${CLUSTER_FQDN}\n${TAGS}"
 ```
 
 ## Prepare the local working environment
@@ -120,7 +120,7 @@ fi
 
 ## Configure AWS Route 53 Domain delegation
 
-> This should be done only once.
+> DNS delegation should be done only once.
 
 Create DNS zone for EKS clusters:
 
