@@ -24,6 +24,7 @@ concurrency: test-k8s-eks-rancher
 
 jobs:
   k8s-eks-rancher:
+    name: "${{ github.event.inputs.action }} | test-k8s-eks-rancher"
     runs-on: ubuntu-latest
     permissions:
       id-token: write
