@@ -40,7 +40,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 
 ```bash
 if ! command -v kubectl &> /dev/null; then
-  # renovate: datasource=github-tags depName=kubectl lookupName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+  # renovate: datasource=github-tags depName=kubectl packageName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
   KUBECTL_VERSION="1.22.1"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
@@ -50,14 +50,13 @@ fi
 Set necessary variables and verify if all the necessary variables were set:
 
 ```bash
+# AWS Region
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 # Hostname / FQDN definitions
+export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
 export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
 export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
-export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
 export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
-# AWS Region
-export AWS_DEFAULT_REGION="eu-central-1"
-export AWS_PAGER=""
 
 : "${AWS_ACCESS_KEY_ID?}"
 : "${AWS_DEFAULT_REGION?}"
