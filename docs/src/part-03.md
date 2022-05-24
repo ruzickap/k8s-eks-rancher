@@ -108,7 +108,7 @@ and modify the
 
 ```bash
 # renovate: datasource=helm depName=ingress-nginx packageName=ingress-nginx registryUrl=https://kubernetes.github.io/ingress-nginx
-INGRESS_NGINX_HELM_CHART_VERSION="4.1.1"
+INGRESS_NGINX_HELM_CHART_VERSION="4.1.2"
 
 helm repo add --force-update ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm upgrade --install --version "${INGRESS_NGINX_HELM_CHART_VERSION}" --namespace ingress-nginx --create-namespace --wait --values - ingress-nginx ingress-nginx/ingress-nginx << EOF
