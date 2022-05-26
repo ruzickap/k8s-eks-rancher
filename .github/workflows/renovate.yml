@@ -10,7 +10,6 @@ on:
         options:
           - true
           - false
-        required: false
       logLevel:
         type: choice
         description: "Log-Level"
@@ -19,7 +18,6 @@ on:
           - info
           - debug
           - trace
-        required: false
   push:
     branches:
       - main
