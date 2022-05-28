@@ -49,10 +49,7 @@
       // https://github.com/renovatebot/renovate/discussions/14366
       "fileMatch": [ "^docs/src/part-.*\\.md$" ],
       "matchStrings": [
-        // Matches: AWSCLI_VERSION="2.7.1" | TEST_VERSION=2.7.1
-        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*_VERSION=\"?(?<currentValue>.+?)\"?\\s",
-        // Matches: version: 1.2.3 | version_test: "1.2.3"
-        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)\\s+.+:\\s+\"?(?<currentValue>.+?)\"?\\s",
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",
       ],
       // This is needed for cert-manager for example
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",

@@ -11,7 +11,7 @@ and modify the
 Service account `cert-manager` was created by `eksctl`.
 
 ```bash
-# renovate: datasource=helm depName=cert-manager packageName=cert-manager registryUrl=https://charts.jetstack.io
+# renovate: datasource=helm depName=cert-manager registryUrl=https://charts.jetstack.io
 CERT_MANAGER_HELM_CHART_VERSION="1.8.0"
 
 helm repo add --force-update jetstack https://charts.jetstack.io
@@ -82,7 +82,7 @@ and modify the
 Service account `external-dns` was created by `eksctl`.
 
 ```bash
-# renovate: datasource=helm depName=external-dns packageName=external-dns registryUrl=https://charts.bitnami.com/bitnami
+# renovate: datasource=helm depName=external-dns registryUrl=https://charts.bitnami.com/bitnami
 EXTERNAL_DNS_HELM_CHART_VERSION="6.5.1"
 
 helm repo add --force-update bitnami https://charts.bitnami.com/bitnami
@@ -107,7 +107,7 @@ and modify the
 [default values](https://github.com/kubernetes/ingress-nginx/blob/master/charts/ingress-nginx/values.yaml).
 
 ```bash
-# renovate: datasource=helm depName=ingress-nginx packageName=ingress-nginx registryUrl=https://kubernetes.github.io/ingress-nginx
+# renovate: datasource=helm depName=ingress-nginx registryUrl=https://kubernetes.github.io/ingress-nginx
 INGRESS_NGINX_HELM_CHART_VERSION="4.1.2"
 
 helm repo add --force-update ingress-nginx https://kubernetes.github.io/ingress-nginx
@@ -161,7 +161,7 @@ and modify the
 [default values](https://github.com/rancher/rancher/blob/master/chart/values.yaml).
 
 ```bash
-# renovate: datasource=helm depName=rancher packageName=rancher registryUrl=https://releases.rancher.com/server-charts/latest
+# renovate: datasource=helm depName=rancher registryUrl=https://releases.rancher.com/server-charts/latest
 RANCHER_HELM_CHART_VERSION="2.6.5"
 
 helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest

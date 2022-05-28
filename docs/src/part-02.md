@@ -97,7 +97,7 @@ iam:
       wellKnownPolicies:
         externalDNS: true
 karpenter:
-  # renovate: datasource=github-tags depName=karpenter packageName=aws/karpenter
+  # renovate: datasource=github-tags depName=aws/karpenter
   version: 0.9.1
   createServiceAccount: true
 addons:
