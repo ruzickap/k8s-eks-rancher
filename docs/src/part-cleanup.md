@@ -53,8 +53,8 @@ Set necessary variables and verify if all the necessary variables were set:
 # AWS Region
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 # Hostname / FQDN definitions
-export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
 export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
+export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
 export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
 export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
 
