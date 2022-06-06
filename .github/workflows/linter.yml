@@ -17,8 +17,6 @@ name: Lint Code Base
 on:
   workflow_dispatch:
   push:
-    branches-ignore:
-      - main
 
 ###############
 # Set the Job #
@@ -42,28 +40,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract commands from markdown files
-        run: |
-          set -euxo pipefail
-          echo '#!/usr/bin/env bash' > README.sh
-          find . -name '*.md' -print0 | while IFS= read -r -d '' FILE ; do
-            sed -n "/^\`\`\`\(bash\|shell\).*/,/^\`\`\`$/p" "${FILE}" \
-            | \
-            sed \
-              -e 's/^```\(bash\|shell\).*/\n/' \
-              -e 's/^```$//' \
-            >> README.sh
-          done
-          chmod a+x README.sh
-
       ################################
       # Run Linter against code base #
       ################################
       - name: Lint Code Base
         uses: github/super-linter/slim@v4
         env:
-          DEFAULT_BRANCH: main
-          ERROR_ON_MISSING_EXEC_BIT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USE_FIND_ALGORITHM: true
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           VALIDATE_CSS: false

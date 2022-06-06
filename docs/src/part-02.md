@@ -56,7 +56,7 @@ if [[ $(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --q
     --parameters "ParameterKey=BaseDomain,ParameterValue=${BASE_DOMAIN} ParameterKey=ClusterFQDN,ParameterValue=${CLUSTER_FQDN}" \
     --stack-name "${CLUSTER_NAME}-route53" \
     --template-body "file://tmp/${CLUSTER_FQDN}/cf-route53.yml" \
-    --tags "$(echo "${TAGS}" | sed  -e 's/\([^ =]*\)=\([^ ]*\)/Key=\1,Value=\2/g')" || true
+    --tags "$(echo "${TAGS}" | sed -e 's/\([^ =]*\)=\([^ ]*\)/Key=\1,Value=\2/g')" || true
 fi
 ```
 
@@ -120,8 +120,8 @@ managedNodeGroups:
     disableIMDSv1: true
 EOF
 
-if [[ ! -s "${KUBECONFIG}" ]] ; then
-  if  ! eksctl get clusters --name="${CLUSTER_NAME}" &> /dev/null ; then
+if [[ ! -s "${KUBECONFIG}" ]]; then
+  if ! eksctl get clusters --name="${CLUSTER_NAME}" &> /dev/null; then
     eksctl create cluster --config-file "tmp/${CLUSTER_FQDN}/eksctl-${CLUSTER_NAME}.yaml" --kubeconfig "${KUBECONFIG}"
   else
     eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
@@ -144,11 +144,11 @@ using different user for CLI operations and different user/role for accessing
 the AWS Console to see EKS Workloads in Cluster's tab.
 
 ```bash
-if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" &> /dev/null ; then
+if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" &> /dev/null; then
   eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" --group system:masters --username admin
 fi
 
-if [[ -n ${AWS_USER_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" &> /dev/null ; then
+if [[ -n ${AWS_USER_ROLE_ARN+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" &> /dev/null; then
   eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" --group system:masters --username admin
 fi
 ```

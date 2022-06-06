@@ -42,7 +42,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
   KUBECTL_VERSION="1.24.1"
-  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
 ```
@@ -70,7 +70,7 @@ export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
 Remove EKS cluster and created components:
 
 ```bash
-if eksctl get cluster --name="${CLUSTER_NAME}" 2>/dev/null ; then
+if eksctl get cluster --name="${CLUSTER_NAME}" 2> /dev/null; then
   eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
   eksctl delete cluster --name="${CLUSTER_NAME}" --force
 fi
@@ -79,18 +79,18 @@ fi
 Remove orphan EC2 created by Karpenter:
 
 ```bash
-EC2S=$(aws ec2 describe-instances --filter "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" --query "Reservations[].Instances[].InstanceId"  --output text) && \
-for EC2 in ${EC2S}; do
-  echo "Removing EC2: ${EC2}"
-  aws ec2 terminate-instances --instance-ids "${EC2}"
-done
+EC2S=$(aws ec2 describe-instances --filter "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" --query "Reservations[].Instances[].InstanceId" --output text) &&
+  for EC2 in ${EC2S}; do
+    echo "Removing EC2: ${EC2}"
+    aws ec2 terminate-instances --instance-ids "${EC2}"
+  done
 ```
 
 Remove orphan ELBs, NLBs (if exists):
 
 ```bash
 # Remove Network ELBs
-for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
+for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text); do
   if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
     echo "💊 Deleting Network ELB: ${NETWORK_ELB_ARN}"
     aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
@@ -98,7 +98,7 @@ for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancer
 done
 
 # Remove Classic ELBs
-for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
+for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text); do
   if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
     echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
     aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
@@ -112,12 +112,12 @@ Remove Route 53 DNS records from DNS Zone:
 CLUSTER_FQDN_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
 if [[ -n "${CLUSTER_FQDN_ZONE_ID}" ]]; then
   aws route53 list-resource-record-sets --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" | jq -c '.ResourceRecordSets[] | select (.Type != "SOA" and .Type != "NS")' |
-  while read -r RESOURCERECORDSET; do
-    aws route53 change-resource-record-sets \
-      --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" \
-      --change-batch '{"Changes":[{"Action":"DELETE","ResourceRecordSet": '"${RESOURCERECORDSET}"' }]}' \
-      --output text --query 'ChangeInfo.Id'
-  done
+    while read -r RESOURCERECORDSET; do
+      aws route53 change-resource-record-sets \
+        --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" \
+        --change-batch '{"Changes":[{"Action":"DELETE","ResourceRecordSet": '"${RESOURCERECORDSET}"' }]}' \
+        --output text --query 'ChangeInfo.Id'
+    done
 fi
 ```
 
@@ -130,17 +130,17 @@ aws cloudformation delete-stack --stack-name "${CLUSTER_NAME}-route53"
 Remove Volumes and Snapshots related to the cluster:
 
 ```bash
-VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Volumes[].VolumeId' --output text) && \
-for VOLUME in ${VOLUMES}; do
-  echo "Removing Volume: ${VOLUME}"
-  aws ec2 delete-volume --volume-id "${VOLUME}"
-done
+VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Volumes[].VolumeId' --output text) &&
+  for VOLUME in ${VOLUMES}; do
+    echo "Removing Volume: ${VOLUME}"
+    aws ec2 delete-volume --volume-id "${VOLUME}"
+  done
 
-SNAPSHOTS=$(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Snapshots[].SnapshotId' --output text) && \
-for SNAPSHOT in ${SNAPSHOTS}; do
-  echo "Removing Snapshot: ${SNAPSHOT}"
-  aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
-done
+SNAPSHOTS=$(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Snapshots[].SnapshotId' --output text) &&
+  for SNAPSHOT in ${SNAPSHOTS}; do
+    echo "Removing Snapshot: ${SNAPSHOT}"
+    aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
+  done
 ```
 
 Wait for all CloudFormation stacks to be deleted:
