@@ -5,9 +5,9 @@ set -euxo pipefail
 export CI="${CI:-false}"
 
 if [[ "${CI}" = "true" ]]; then
-  DOCKER_CLI_PARAMS=( "-i" "--rm" )
+  DOCKER_CLI_PARAMS=("-i" "--rm")
 else
-  DOCKER_CLI_PARAMS=( "-i" "-t" "--rm" )
+  DOCKER_CLI_PARAMS=("-i" "-t" "--rm")
 fi
 
 docker run "${DOCKER_CLI_PARAMS[@]}" \
