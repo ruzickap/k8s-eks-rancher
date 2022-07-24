@@ -29,6 +29,7 @@ jobs:
           FORMATTERS_DISABLE_ERRORS: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRINT_ALPACA: false
+          REPOSITORY_DEVSKIM_FILTER_REGEX_EXCLUDE: cloudformation/gh-action-iam-role-oidc\.yaml
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
 
       - name: Create Pull Request with applied fixes
