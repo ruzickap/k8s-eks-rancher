@@ -34,7 +34,7 @@ export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Rancher password
 export MY_PASSWORD="xxxxxxxx"
-# export AWS_SESSION_TOKEN="....."
+# export AWS_SESSION_TOKEN="xxxxxxxx"
 ```
 
 Verify if all the necessary variables were set:
@@ -102,7 +102,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.24.2"
+  KUBECTL_VERSION="1.24.3"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
