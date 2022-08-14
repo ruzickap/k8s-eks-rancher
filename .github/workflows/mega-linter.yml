@@ -22,10 +22,11 @@ jobs:
 
       - name: MegaLinter
         id: ml
-        uses: megalinter/megalinter@v6
+        uses: megalinter/megalinter@v6.1.0
         env:
           BASH_SHFMT_ARGUMENTS: --indent 2 --space-redirects
-          DISABLE_LINTERS: REPOSITORY_DEVSKIM,REPOSITORY_SEMGREP,SPELL_CSPELL,SPELL_PROSELINT
+          DISABLE_LINTERS: CSS_STYLELINT,REPOSITORY_DEVSKIM,REPOSITORY_SEMGREP,SPELL_CSPELL,SPELL_PROSELINT
+          SPELL_MISSPELL_ARGUMENTS: -i existant
           FORMATTERS_DISABLE_ERRORS: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRINT_ALPACA: false
