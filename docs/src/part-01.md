@@ -34,7 +34,7 @@ export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
 export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # Rancher password
 export MY_PASSWORD="xxxxxxxx"
-# export AWS_SESSION_TOKEN="....."
+# export AWS_SESSION_TOKEN="xxxxxxxx"
 ```
 
 Verify if all the necessary variables were set:
