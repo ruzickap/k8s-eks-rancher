@@ -8,6 +8,6 @@
 * [awscli](https://aws.amazon.com/cli/)
 * [AWS account](https://aws.amazon.com/account/)
 * [Helm](https://helm.sh/)
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
 * [eksctl](https://eksctl.io/)
 * Kubernetes and AWS knowledge required
