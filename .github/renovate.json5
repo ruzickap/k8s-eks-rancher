@@ -35,6 +35,13 @@
     },
 
     {
+      "description": "Update all github-actions by default",
+      "matchManagers": ["github-actions"],
+      "automergeType": "branch",
+      "automerge": true,
+    },
+
+    {
       "description": "autoMerge only patch releases for karpenter due to eksctl support",
       "matchPackageNames": ["aws/karpenter"],
       "matchUpdateTypes": ["major", "minor"],
