@@ -117,7 +117,6 @@ managedNodeGroups:
       <<: *tags
       compliance:na:defender: bottlerocket
     volumeEncrypted: true
-    disableIMDSv1: true
 EOF
 
 if [[ ! -s "${KUBECONFIG}" ]]; then
@@ -130,6 +129,8 @@ fi
 
 aws eks update-kubeconfig --name="${CLUSTER_NAME}"
 ```
+
+<!-- markdownlint-disable no-inline-html -->
 
 <aside class="note">
 
@@ -178,12 +179,10 @@ spec:
       - deviceName: /dev/xvda
         ebs:
           volumeSize: 3Gi
-          volumeType: gp3
           encrypted: true
       - deviceName: /dev/xvdb
         ebs:
           volumeSize: 20Gi
-          volumeType: gp3
           encrypted: true
     instanceProfile: eksctl-KarpenterNodeInstanceProfile-${CLUSTER_NAME}
     subnetSelector:

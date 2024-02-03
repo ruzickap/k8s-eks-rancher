@@ -30,11 +30,11 @@ and other secrets/variables.
 
 ```shell
 # AWS Credentials
-export AWS_ACCESS_KEY_ID="xxxxxxxxxxxxxxxxxx"
-export AWS_SECRET_ACCESS_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+export AWS_ACCESS_KEY_ID="******************"
+export AWS_SECRET_ACCESS_KEY="******************"
 # Rancher password
-export MY_PASSWORD="xxxxxxxx"
-# export AWS_SESSION_TOKEN="xxxxxxxx"
+export MY_PASSWORD="**********"
+# export AWS_SESSION_TOKEN="**********"
 ```
 
 Verify if all the necessary variables were set:
@@ -56,6 +56,8 @@ echo -e "${MY_EMAIL} | ${CLUSTER_NAME} | ${BASE_DOMAIN} | ${CLUSTER_FQDN}\n${TAG
 ```
 
 ## Prepare the local working environment
+
+<!-- markdownlint-disable no-inline-html -->
 
 <aside class="note">
 

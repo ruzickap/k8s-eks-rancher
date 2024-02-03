@@ -5,7 +5,6 @@ description = "Few notes about Amazon EKS installation and Rancher"
 authors = ["Petr Ruzicka"]
 
 [output.html]
-additional-css = ["theme/css/custom.css"]
 edit-url-template = "https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/{path}"
 git-repository-url = "https://github.com/ruzickap/k8s-eks-rancher"
 site-url = "/k8s-eks-rancher/"
