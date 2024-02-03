@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: 💡🔪 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@010d0da01d0b5a38af31e9c3470dbfdabdecca3a # v4.0.1
         with:
           role-to-assume: ${{ env.AWS_GITHUB_OIDC_FEDERATED_ROLE_TO_ASSUME }}
           role-session-name: GitHubOidcFederatedRole
