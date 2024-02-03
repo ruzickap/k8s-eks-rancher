@@ -31,7 +31,7 @@ jobs:
     name: "${{ github.event.inputs.action }} | test-k8s-eks-rancher"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: 💡🔪 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
