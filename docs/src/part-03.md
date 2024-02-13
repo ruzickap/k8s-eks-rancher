@@ -162,7 +162,7 @@ and modify the
 
 ```bash
 # renovate: datasource=helm depName=rancher registryUrl=https://releases.rancher.com/server-charts/latest
-RANCHER_HELM_CHART_VERSION="2.7.9"
+RANCHER_HELM_CHART_VERSION="2.7.10"
 
 helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
 helm upgrade --install --version "v${RANCHER_HELM_CHART_VERSION}" --namespace cattle-system --wait --values - rancher rancher-latest/rancher << EOF
