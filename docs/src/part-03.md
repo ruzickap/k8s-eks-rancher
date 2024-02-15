@@ -83,7 +83,7 @@ Service account `external-dns` was created by `eksctl`.
 
 ```bash
 # renovate: datasource=helm depName=external-dns registryUrl=https://charts.bitnami.com/bitnami
-EXTERNAL_DNS_HELM_CHART_VERSION="6.13.4"
+EXTERNAL_DNS_HELM_CHART_VERSION="6.32.1"
 
 helm repo add --force-update bitnami https://charts.bitnami.com/bitnami
 helm upgrade --install --version "${EXTERNAL_DNS_HELM_CHART_VERSION}" --namespace external-dns --wait --values - external-dns bitnami/external-dns << EOF
