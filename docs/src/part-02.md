@@ -98,7 +98,7 @@ iam:
         externalDNS: true
 karpenter:
   # renovate: datasource=github-tags depName=aws/karpenter
-  version: 0.36.2
+  version: 0.37.0
   createServiceAccount: true
 addons:
   - name: vpc-cni
