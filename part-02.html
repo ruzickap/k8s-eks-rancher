@@ -1,0 +1,431 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Create additional AWS structure and Amazon EKS - Amazon EKS with Rancher</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Few notes about Amazon EKS installation and Rancher">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="part-01.html"><strong aria-hidden="true">2.</strong> Prepare AWS Account</a></li><li class="chapter-item expanded "><a href="part-02.html" class="active"><strong aria-hidden="true">3.</strong> Create additional AWS structure and Amazon EKS</a></li><li class="chapter-item expanded "><a href="part-03.html"><strong aria-hidden="true">4.</strong> Install Kubernetes basic cluster components</a></li><li class="chapter-item expanded "><a href="part-cleanup.html"><strong aria-hidden="true">5.</strong> Clean-up</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Amazon EKS with Rancher</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/ruzickap/k8s-eks-rancher" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-02.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="create-additional-aws-structure-and-amazon-eks"><a class="header" href="#create-additional-aws-structure-and-amazon-eks">Create additional AWS structure and Amazon EKS</a></h1>
+<ul>
+<li><a href="#create-route53">Create Route53</a></li>
+<li><a href="#create-amazon-eks">Create Amazon EKS</a></li>
+<li><a href="#configure-karpenter">Configure Karpenter</a></li>
+<li><a href="#post-installation-tasks">Post installation tasks</a></li>
+</ul>
+<h2 id="create-route53"><a class="header" href="#create-route53">Create Route53</a></h2>
+<p>Create CloudFormation template containing policies for Route53 and Domain.</p>
+<p>Put new domain <code>CLUSTER_FQDN</code> to the Route 53 and configure the DNS delegation
+from the <code>BASE_DOMAIN</code>.</p>
+<p>Create temporary directory for files used for creating/configuring EKS Cluster
+and it's components:</p>
+<pre><code class="language-bash">mkdir -p "tmp/${CLUSTER_FQDN}"
+</code></pre>
+<p>Create Route53 zone:</p>
+<pre><code class="language-bash">cat &gt; "tmp/${CLUSTER_FQDN}/cf-route53.yml" &lt;&lt; \EOF
+AWSTemplateFormatVersion: 2010-09-09
+Description: Route53 entries
+
+Parameters:
+
+  BaseDomain:
+    Description: "Base domain where cluster domains + their subdomains will live. Ex: k8s.mylabs.dev"
+    Type: String
+
+  ClusterFQDN:
+    Description: "Cluster FQDN. (domain for all applications) Ex: kube1.k8s.mylabs.dev"
+    Type: String
+
+Resources:
+
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref ClusterFQDN
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub "${BaseDomain}."
+      Name: !Ref ClusterFQDN
+      Type: NS
+      TTL: 60
+      ResourceRecords: !GetAtt HostedZone.NameServers
+EOF
+
+if [[ $(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[?starts_with(StackName, \`${CLUSTER_NAME}-route53\`) == \`true\`].StackName" --output text) == "" ]]; then
+  # shellcheck disable=SC2001
+  eval aws cloudformation "create-stack" \
+    --parameters "ParameterKey=BaseDomain,ParameterValue=${BASE_DOMAIN} ParameterKey=ClusterFQDN,ParameterValue=${CLUSTER_FQDN}" \
+    --stack-name "${CLUSTER_NAME}-route53" \
+    --template-body "file://tmp/${CLUSTER_FQDN}/cf-route53.yml" \
+    --tags "$(echo "${TAGS}" | sed -e 's/\([^ =]*\)=\([^ ]*\)/Key=\1,Value=\2/g')" || true
+fi
+</code></pre>
+<h2 id="create-amazon-eks"><a class="header" href="#create-amazon-eks">Create Amazon EKS</a></h2>
+<p><img src="https://raw.githubusercontent.com/aws-samples/eks-workshop/65b766c494a5b4f5420b2912d8373c4957163541/static/images/3-service-animated.gif" alt="EKS" title="EKS" /></p>
+<p>Create <a href="https://aws.amazon.com/eks/">Amazon EKS</a> in AWS by using <a href="https://eksctl.io/">eksctl</a>.</p>
+<p><img src="https://raw.githubusercontent.com/weaveworks/eksctl/c365149fc1a0b8d357139cbd6cda5aee8841c16c/logo/eksctl.png" alt="eksctl" title="eksctl" /></p>
+<p>Create the Amazon EKS cluster with Calico using <code>eksctl</code>:</p>
+<pre><code class="language-bash">cat &gt; "tmp/${CLUSTER_FQDN}/eksctl-${CLUSTER_NAME}.yaml" &lt;&lt; EOF
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${AWS_DEFAULT_REGION}
+  version: "1.22"
+  tags: &amp;tags
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+$(echo "${TAGS}" | sed "s/ /\\n    /g; s/^/    /g; s/=/: /g")
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: cert-manager
+        namespace: cert-manager
+      wellKnownPolicies:
+        certManager: true
+    - metadata:
+        name: external-dns
+        namespace: external-dns
+      wellKnownPolicies:
+        externalDNS: true
+karpenter:
+  # renovate: datasource=github-tags depName=aws/karpenter
+  version: 0.37.0
+  createServiceAccount: true
+addons:
+  - name: vpc-cni
+  - name: kube-proxy
+  - name: coredns
+  - name: aws-ebs-csi-driver
+managedNodeGroups:
+  - name: ${CLUSTER_NAME}-ng
+    amiFamily: Bottlerocket
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 5
+    volumeSize: 30
+    tags:
+      &lt;&lt;: *tags
+      compliance:na:defender: bottlerocket
+    volumeEncrypted: true
+EOF
+
+if [[ ! -s "${KUBECONFIG}" ]]; then
+  if ! eksctl get clusters --name="${CLUSTER_NAME}" &amp;&gt; /dev/null; then
+    eksctl create cluster --config-file "tmp/${CLUSTER_FQDN}/eksctl-${CLUSTER_NAME}.yaml" --kubeconfig "${KUBECONFIG}"
+  else
+    eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+  fi
+fi
+
+aws eks update-kubeconfig --name="${CLUSTER_NAME}"
+</code></pre>
+<!-- markdownlint-disable no-inline-html -->
+<aside class="note">
+<h1 id="note"><a class="header" href="#note">Note</a></h1>
+<p>The following step is not mandatory (it is recommended)...</p>
+</aside>
+<p>Add add the user or role to the <code>aws-auth</code> ConfigMap. This is handy if you are
+using different user for CLI operations and different user/role for accessing
+the AWS Console to see EKS Workloads in Cluster's tab.</p>
+<pre><code class="language-bash">if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN+x} ]] &amp;&amp; ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" &amp;&gt; /dev/null; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" --group system:masters --username admin
+fi
+
+if [[ -n ${AWS_USER_ROLE_ARN+x} ]] &amp;&amp; ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" &amp;&gt; /dev/null; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" --group system:masters --username admin
+fi
+</code></pre>
+<h2 id="configure-karpenter"><a class="header" href="#configure-karpenter">Configure Karpenter</a></h2>
+<pre><code class="language-bash">kubectl apply -f - &lt;&lt; EOF
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: ${CLUSTER_FQDN//./-}
+spec:
+  requirements:
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["on-demand"]
+    - key: "topology.kubernetes.io/zone"
+      operator: In
+      values: ["${AWS_DEFAULT_REGION}a", "${AWS_DEFAULT_REGION}b", "${AWS_DEFAULT_REGION}c"]
+  limits:
+    resources:
+      cpu: 1000
+  provider:
+    amiFamily: Bottlerocket
+    blockDeviceMappings:
+      - deviceName: /dev/xvda
+        ebs:
+          volumeSize: 3Gi
+          encrypted: true
+      - deviceName: /dev/xvdb
+        ebs:
+          volumeSize: 20Gi
+          encrypted: true
+    instanceProfile: eksctl-KarpenterNodeInstanceProfile-${CLUSTER_NAME}
+    subnetSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    securityGroupSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    tags:
+      Name: ${CLUSTER_FQDN}-karpenter
+$(echo "${TAGS}" | sed "s/ /\\n      /g; s/^/      /g; s/=/: /g")
+  ttlSecondsAfterEmpty: 30
+EOF
+</code></pre>
+<h2 id="post-installation-tasks"><a class="header" href="#post-installation-tasks">Post installation tasks</a></h2>
+<p>Change TTL=60 of SOA + NS records for new domain
+(it can not be done in CloudFormation):</p>
+<pre><code class="language-bash">if [[ ! -s "tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml" ]]; then
+  HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
+  RESOURCE_RECORD_SET_SOA=$(aws route53 --output json list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --query "(ResourceRecordSets[?Type == \`SOA\`])[0]" | sed "s/\"TTL\":.*/\"TTL\": 60,/")
+  RESOURCE_RECORD_SET_NS=$(aws route53 --output json list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --query "(ResourceRecordSets[?Type == \`NS\`])[0]" | sed "s/\"TTL\":.*/\"TTL\": 60,/")
+  cat &lt;&lt; EOF | jq &gt; "tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml"
+{
+    "Comment": "Update record to reflect new TTL for SOA and NS records",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet":
+${RESOURCE_RECORD_SET_SOA}
+        },
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet":
+${RESOURCE_RECORD_SET_NS}
+        }
+    ]
+}
+EOF
+  aws route53 change-resource-record-sets --output json --hosted-zone-id "${HOSTED_ZONE_ID}" --change-batch="file://tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml"
+fi
+</code></pre>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-02.md">Edit this page on GitHub.</a></footer>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="part-01.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="part-03.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="part-01.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="part-03.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

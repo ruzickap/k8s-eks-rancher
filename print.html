@@ -1,0 +1,895 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Amazon EKS with Rancher</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Few notes about Amazon EKS installation and Rancher">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="part-01.html"><strong aria-hidden="true">2.</strong> Prepare AWS Account</a></li><li class="chapter-item expanded "><a href="part-02.html"><strong aria-hidden="true">3.</strong> Create additional AWS structure and Amazon EKS</a></li><li class="chapter-item expanded "><a href="part-03.html"><strong aria-hidden="true">4.</strong> Install Kubernetes basic cluster components</a></li><li class="chapter-item expanded "><a href="part-cleanup.html"><strong aria-hidden="true">5.</strong> Clean-up</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Amazon EKS with Rancher</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/ruzickap/k8s-eks-rancher" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="amazon-eks-with-rancher"><a class="header" href="#amazon-eks-with-rancher">Amazon EKS with Rancher</a></h1>
+<ul>
+<li>GitHub repository: <a href="https://github.com/ruzickap/k8s-eks-rancher">https://github.com/ruzickap/k8s-eks-rancher</a></li>
+<li>Web Pages: <a href="https://ruzickap.github.io/k8s-eks-rancher">https://ruzickap.github.io/k8s-eks-rancher</a></li>
+</ul>
+<h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
+<ul>
+<li><a href="https://aws.amazon.com/cli/">awscli</a></li>
+<li><a href="https://aws.amazon.com/account/">AWS account</a></li>
+<li><a href="https://helm.sh/">Helm</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/#kubectl">kubectl</a></li>
+<li><a href="https://eksctl.io/">eksctl</a></li>
+<li>Kubernetes and AWS knowledge required</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="prepare-aws-account"><a class="header" href="#prepare-aws-account">Prepare AWS Account</a></h1>
+<ul>
+<li><a href="part-01.html#requirements">Requirements</a></li>
+<li><a href="part-01.html#prepare-the-local-working-environment">Prepare the local working environment</a></li>
+<li><a href="part-01.html#configure-aws-route-53-domain-delegation">Configure AWS Route 53 Domain delegation</a></li>
+<li><a href="part-01.html#allow-gh-actions-to-connect-to-aws-accounts">Allow GH Actions to connect to AWS accounts</a></li>
+</ul>
+<h2 id="requirements-1"><a class="header" href="#requirements-1">Requirements</a></h2>
+<p>If you would like to follow this documents and it's task you will need to set up
+few environment variables.</p>
+<p><code>BASE_DOMAIN</code> (<code>k8s.mylabs.dev</code>) contains DNS records for all your Kubernetes
+clusters. The cluster names will look like <code>CLUSTER_NAME</code>.<code>BASE_DOMAIN</code>
+(<code>kube1.k8s.mylabs.dev</code>).</p>
+<pre><code class="language-bash"># AWS Region
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
+# Hostname / FQDN definitions
+export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
+export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
+export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
+export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
+export LETSENCRYPT_ENVIRONMENT="staging"
+export MY_EMAIL="petr.ruzicka@gmail.com"
+# Tags used to tag the AWS resources
+export TAGS="Owner=${MY_EMAIL} Environment=dev Group=Cloud_Native Squad=Cloud_Container_Platform"
+</code></pre>
+<p>You will need to configure <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html">AWS CLI</a>
+and other secrets/variables.</p>
+<pre><code class="language-shell"># AWS Credentials
+export AWS_ACCESS_KEY_ID="******************"
+export AWS_SECRET_ACCESS_KEY="******************"
+# Rancher password
+export MY_PASSWORD="**********"
+# export AWS_SESSION_TOKEN="**********"
+</code></pre>
+<p>Verify if all the necessary variables were set:</p>
+<pre><code class="language-bash">: "${AWS_ACCESS_KEY_ID?}"
+: "${AWS_DEFAULT_REGION?}"
+: "${AWS_SECRET_ACCESS_KEY?}"
+: "${BASE_DOMAIN?}"
+: "${CLUSTER_FQDN?}"
+: "${CLUSTER_NAME?}"
+: "${KUBECONFIG?}"
+: "${LETSENCRYPT_ENVIRONMENT?}"
+: "${MY_EMAIL?}"
+: "${MY_PASSWORD}"
+: "${TAGS?}"
+
+echo -e "${MY_EMAIL} | ${CLUSTER_NAME} | ${BASE_DOMAIN} | ${CLUSTER_FQDN}\n${TAGS}"
+</code></pre>
+<h2 id="prepare-the-local-working-environment"><a class="header" href="#prepare-the-local-working-environment">Prepare the local working environment</a></h2>
+<!-- markdownlint-disable no-inline-html -->
+<aside class="note">
+<h1 id="note"><a class="header" href="#note">Note</a></h1>
+<p>You can skip these steps if you have all the required software already
+installed.</p>
+</aside>
+<p>Install necessary software:</p>
+<pre><code class="language-bash">if command -v apt-get &amp;&gt; /dev/null; then
+  apt update -qq
+  apt-get install -y -qq curl git jq sudo unzip &gt; /dev/null
+fi
+</code></pre>
+<p>Install <a href="https://aws.amazon.com/cli/">AWS CLI</a> binary:</p>
+<pre><code class="language-bash">if ! command -v aws &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=aws/aws-cli
+  AWSCLI_VERSION="2.17.6"
+  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
+  unzip -q -o /tmp/awscli.zip -d /tmp/
+  sudo /tmp/aws/install
+fi
+</code></pre>
+<p>Install <a href="https://eksctl.io/">eksctl</a>:</p>
+<pre><code class="language-bash">if ! command -v eksctl &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=weaveworks/eksctl
+  EKSCTL_VERSION="0.183.0"
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+fi
+</code></pre>
+<p>Install <a href="https://github.com/kubernetes/kubectl">kubectl</a> binary:</p>
+<pre><code class="language-bash">if ! command -v kubectl &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?&lt;version&gt;.+)$
+  KUBECTL_VERSION="1.30.2"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&amp;/g")/amd64/kubectl"
+  sudo chmod a+x /usr/local/bin/kubectl
+fi
+</code></pre>
+<p>Install <a href="https://helm.sh/">Helm</a>:</p>
+<pre><code class="language-bash">if ! command -v helm &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=helm/helm
+  HELM_VERSION="3.15.2"
+  curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
+fi
+</code></pre>
+<h2 id="configure-aws-route-53-domain-delegation"><a class="header" href="#configure-aws-route-53-domain-delegation">Configure AWS Route 53 Domain delegation</a></h2>
+<blockquote>
+<p>DNS delegation should be done only once.</p>
+</blockquote>
+<p>Create DNS zone for EKS clusters:</p>
+<pre><code class="language-shell">export CLOUDFLARE_EMAIL="petr.ruzicka@gmail.com"
+export CLOUDFLARE_API_KEY="11234567890"
+
+aws route53 create-hosted-zone --output json \
+  --name "${BASE_DOMAIN}" \
+  --caller-reference "$(date)" \
+  --hosted-zone-config="{\"Comment\": \"Created by petr.ruzicka@gmail.com\", \"PrivateZone\": false}" | jq
+</code></pre>
+<p>Use your domain registrar to change the nameservers for your zone (for example
+<code>mylabs.dev</code>) to use the Amazon Route 53 nameservers. Here is the way how you
+can find out the the Route 53 nameservers:</p>
+<pre><code class="language-shell">NEW_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${BASE_DOMAIN}.\`].Id" --output text)
+NEW_ZONE_NS=$(aws route53 get-hosted-zone --output json --id "${NEW_ZONE_ID}" --query "DelegationSet.NameServers")
+NEW_ZONE_NS1=$(echo "${NEW_ZONE_NS}" | jq -r ".[0]")
+NEW_ZONE_NS2=$(echo "${NEW_ZONE_NS}" | jq -r ".[1]")
+</code></pre>
+<p>Create the NS record in <code>k8s.use1.dev.proj.aws.mylabs.dev</code> (<code>BASE_DOMAIN</code>) for
+proper zone delegation. This step depends on your domain registrar - I'm using
+CloudFlare and using Ansible to automate it:</p>
+<pre><code class="language-shell">ansible -m cloudflare_dns -c local -i "localhost," localhost -a "zone=mylabs.dev record=${BASE_DOMAIN} type=NS value=${NEW_ZONE_NS1} solo=true proxied=no account_email=${CLOUDFLARE_EMAIL} account_api_token=${CLOUDFLARE_API_KEY}"
+ansible -m cloudflare_dns -c local -i "localhost," localhost -a "zone=mylabs.dev record=${BASE_DOMAIN} type=NS value=${NEW_ZONE_NS2} solo=false proxied=no account_email=${CLOUDFLARE_EMAIL} account_api_token=${CLOUDFLARE_API_KEY}"
+</code></pre>
+<p>Output:</p>
+<pre><code class="language-text">localhost | CHANGED =&gt; {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": true,
+    "result": {
+        "record": {
+            "content": "ns-885.awsdns-46.net",
+            "created_on": "2020-11-13T06:25:32.18642Z",
+            "id": "dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb",
+            "locked": false,
+            "meta": {
+                "auto_added": false,
+                "managed_by_apps": false,
+                "managed_by_argo_tunnel": false,
+                "source": "primary"
+            },
+            "modified_on": "2020-11-13T06:25:32.18642Z",
+            "name": "k8s.mylabs.dev",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "type": "NS",
+            "zone_id": "2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe",
+            "zone_name": "mylabs.dev"
+        }
+    }
+}
+localhost | CHANGED =&gt; {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": true,
+    "result": {
+        "record": {
+            "content": "ns-1692.awsdns-19.co.uk",
+            "created_on": "2020-11-13T06:25:37.605605Z",
+            "id": "9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb",
+            "locked": false,
+            "meta": {
+                "auto_added": false,
+                "managed_by_apps": false,
+                "managed_by_argo_tunnel": false,
+                "source": "primary"
+            },
+            "modified_on": "2020-11-13T06:25:37.605605Z",
+            "name": "k8s.mylabs.dev",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "type": "NS",
+            "zone_id": "2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe",
+            "zone_name": "mylabs.dev"
+        }
+    }
+}
+</code></pre>
+<h2 id="allow-gh-actions-to-connect-to-aws-accounts"><a class="header" href="#allow-gh-actions-to-connect-to-aws-accounts">Allow GH Actions to connect to AWS accounts</a></h2>
+<p>You also need to allow GitHub Action to connect to the AWS account(s) where you
+want to provision the clusters.</p>
+<p>Example: <a href="https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html">AWS federation comes to GitHub Actions</a></p>
+<pre><code class="language-shell">aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-eks-rancher" \
+  --stack-name "${USER}-k8s-eks-rancher-gh-action-iam-role-oidc" \
+  --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
+  --tags "Owner=petr.ruzicka@gmail.com"
+</code></pre>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-01.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="create-additional-aws-structure-and-amazon-eks"><a class="header" href="#create-additional-aws-structure-and-amazon-eks">Create additional AWS structure and Amazon EKS</a></h1>
+<ul>
+<li><a href="part-02.html#create-route53">Create Route53</a></li>
+<li><a href="part-02.html#create-amazon-eks">Create Amazon EKS</a></li>
+<li><a href="part-02.html#configure-karpenter">Configure Karpenter</a></li>
+<li><a href="part-02.html#post-installation-tasks">Post installation tasks</a></li>
+</ul>
+<h2 id="create-route53"><a class="header" href="#create-route53">Create Route53</a></h2>
+<p>Create CloudFormation template containing policies for Route53 and Domain.</p>
+<p>Put new domain <code>CLUSTER_FQDN</code> to the Route 53 and configure the DNS delegation
+from the <code>BASE_DOMAIN</code>.</p>
+<p>Create temporary directory for files used for creating/configuring EKS Cluster
+and it's components:</p>
+<pre><code class="language-bash">mkdir -p "tmp/${CLUSTER_FQDN}"
+</code></pre>
+<p>Create Route53 zone:</p>
+<pre><code class="language-bash">cat &gt; "tmp/${CLUSTER_FQDN}/cf-route53.yml" &lt;&lt; \EOF
+AWSTemplateFormatVersion: 2010-09-09
+Description: Route53 entries
+
+Parameters:
+
+  BaseDomain:
+    Description: "Base domain where cluster domains + their subdomains will live. Ex: k8s.mylabs.dev"
+    Type: String
+
+  ClusterFQDN:
+    Description: "Cluster FQDN. (domain for all applications) Ex: kube1.k8s.mylabs.dev"
+    Type: String
+
+Resources:
+
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref ClusterFQDN
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub "${BaseDomain}."
+      Name: !Ref ClusterFQDN
+      Type: NS
+      TTL: 60
+      ResourceRecords: !GetAtt HostedZone.NameServers
+EOF
+
+if [[ $(aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE --query "StackSummaries[?starts_with(StackName, \`${CLUSTER_NAME}-route53\`) == \`true\`].StackName" --output text) == "" ]]; then
+  # shellcheck disable=SC2001
+  eval aws cloudformation "create-stack" \
+    --parameters "ParameterKey=BaseDomain,ParameterValue=${BASE_DOMAIN} ParameterKey=ClusterFQDN,ParameterValue=${CLUSTER_FQDN}" \
+    --stack-name "${CLUSTER_NAME}-route53" \
+    --template-body "file://tmp/${CLUSTER_FQDN}/cf-route53.yml" \
+    --tags "$(echo "${TAGS}" | sed -e 's/\([^ =]*\)=\([^ ]*\)/Key=\1,Value=\2/g')" || true
+fi
+</code></pre>
+<h2 id="create-amazon-eks"><a class="header" href="#create-amazon-eks">Create Amazon EKS</a></h2>
+<p><img src="https://raw.githubusercontent.com/aws-samples/eks-workshop/65b766c494a5b4f5420b2912d8373c4957163541/static/images/3-service-animated.gif" alt="EKS" title="EKS" /></p>
+<p>Create <a href="https://aws.amazon.com/eks/">Amazon EKS</a> in AWS by using <a href="https://eksctl.io/">eksctl</a>.</p>
+<p><img src="https://raw.githubusercontent.com/weaveworks/eksctl/c365149fc1a0b8d357139cbd6cda5aee8841c16c/logo/eksctl.png" alt="eksctl" title="eksctl" /></p>
+<p>Create the Amazon EKS cluster with Calico using <code>eksctl</code>:</p>
+<pre><code class="language-bash">cat &gt; "tmp/${CLUSTER_FQDN}/eksctl-${CLUSTER_NAME}.yaml" &lt;&lt; EOF
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${AWS_DEFAULT_REGION}
+  version: "1.22"
+  tags: &amp;tags
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+$(echo "${TAGS}" | sed "s/ /\\n    /g; s/^/    /g; s/=/: /g")
+iam:
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+        name: cert-manager
+        namespace: cert-manager
+      wellKnownPolicies:
+        certManager: true
+    - metadata:
+        name: external-dns
+        namespace: external-dns
+      wellKnownPolicies:
+        externalDNS: true
+karpenter:
+  # renovate: datasource=github-tags depName=aws/karpenter
+  version: 0.37.0
+  createServiceAccount: true
+addons:
+  - name: vpc-cni
+  - name: kube-proxy
+  - name: coredns
+  - name: aws-ebs-csi-driver
+managedNodeGroups:
+  - name: ${CLUSTER_NAME}-ng
+    amiFamily: Bottlerocket
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 5
+    volumeSize: 30
+    tags:
+      &lt;&lt;: *tags
+      compliance:na:defender: bottlerocket
+    volumeEncrypted: true
+EOF
+
+if [[ ! -s "${KUBECONFIG}" ]]; then
+  if ! eksctl get clusters --name="${CLUSTER_NAME}" &amp;&gt; /dev/null; then
+    eksctl create cluster --config-file "tmp/${CLUSTER_FQDN}/eksctl-${CLUSTER_NAME}.yaml" --kubeconfig "${KUBECONFIG}"
+  else
+    eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+  fi
+fi
+
+aws eks update-kubeconfig --name="${CLUSTER_NAME}"
+</code></pre>
+<!-- markdownlint-disable no-inline-html -->
+<aside class="note">
+<h1 id="note-1"><a class="header" href="#note-1">Note</a></h1>
+<p>The following step is not mandatory (it is recommended)...</p>
+</aside>
+<p>Add add the user or role to the <code>aws-auth</code> ConfigMap. This is handy if you are
+using different user for CLI operations and different user/role for accessing
+the AWS Console to see EKS Workloads in Cluster's tab.</p>
+<pre><code class="language-bash">if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN+x} ]] &amp;&amp; ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" &amp;&gt; /dev/null; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN}" --group system:masters --username admin
+fi
+
+if [[ -n ${AWS_USER_ROLE_ARN+x} ]] &amp;&amp; ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" &amp;&gt; /dev/null; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN}" --group system:masters --username admin
+fi
+</code></pre>
+<h2 id="configure-karpenter"><a class="header" href="#configure-karpenter">Configure Karpenter</a></h2>
+<pre><code class="language-bash">kubectl apply -f - &lt;&lt; EOF
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: ${CLUSTER_FQDN//./-}
+spec:
+  requirements:
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["on-demand"]
+    - key: "topology.kubernetes.io/zone"
+      operator: In
+      values: ["${AWS_DEFAULT_REGION}a", "${AWS_DEFAULT_REGION}b", "${AWS_DEFAULT_REGION}c"]
+  limits:
+    resources:
+      cpu: 1000
+  provider:
+    amiFamily: Bottlerocket
+    blockDeviceMappings:
+      - deviceName: /dev/xvda
+        ebs:
+          volumeSize: 3Gi
+          encrypted: true
+      - deviceName: /dev/xvdb
+        ebs:
+          volumeSize: 20Gi
+          encrypted: true
+    instanceProfile: eksctl-KarpenterNodeInstanceProfile-${CLUSTER_NAME}
+    subnetSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    securityGroupSelector:
+      karpenter.sh/discovery: ${CLUSTER_NAME}
+    tags:
+      Name: ${CLUSTER_FQDN}-karpenter
+$(echo "${TAGS}" | sed "s/ /\\n      /g; s/^/      /g; s/=/: /g")
+  ttlSecondsAfterEmpty: 30
+EOF
+</code></pre>
+<h2 id="post-installation-tasks"><a class="header" href="#post-installation-tasks">Post installation tasks</a></h2>
+<p>Change TTL=60 of SOA + NS records for new domain
+(it can not be done in CloudFormation):</p>
+<pre><code class="language-bash">if [[ ! -s "tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml" ]]; then
+  HOSTED_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
+  RESOURCE_RECORD_SET_SOA=$(aws route53 --output json list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --query "(ResourceRecordSets[?Type == \`SOA\`])[0]" | sed "s/\"TTL\":.*/\"TTL\": 60,/")
+  RESOURCE_RECORD_SET_NS=$(aws route53 --output json list-resource-record-sets --hosted-zone-id "${HOSTED_ZONE_ID}" --query "(ResourceRecordSets[?Type == \`NS\`])[0]" | sed "s/\"TTL\":.*/\"TTL\": 60,/")
+  cat &lt;&lt; EOF | jq &gt; "tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml"
+{
+    "Comment": "Update record to reflect new TTL for SOA and NS records",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet":
+${RESOURCE_RECORD_SET_SOA}
+        },
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet":
+${RESOURCE_RECORD_SET_NS}
+        }
+    ]
+}
+EOF
+  aws route53 change-resource-record-sets --output json --hosted-zone-id "${HOSTED_ZONE_ID}" --change-batch="file://tmp/${CLUSTER_FQDN}/route53-hostedzone-ttl.yml"
+fi
+</code></pre>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-02.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="install-kubernetes-basic-cluster-components"><a class="header" href="#install-kubernetes-basic-cluster-components">Install Kubernetes basic cluster components</a></h1>
+<ul>
+<li><a href="part-03.html#cert-manager">cert-manager</a></li>
+<li><a href="part-03.html#external-dns">external-dns</a></li>
+<li><a href="part-03.html#ingress-nginx">ingress-nginx</a></li>
+<li><a href="part-03.html#rancher">Rancher</a></li>
+</ul>
+<h2 id="cert-manager"><a class="header" href="#cert-manager">cert-manager</a></h2>
+<p>Install <code>cert-manager</code>
+<a href="https://artifacthub.io/packages/helm/jetstack/cert-manager">helm chart</a>
+and modify the
+<a href="https://github.com/jetstack/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml">default values</a>.
+Service account <code>cert-manager</code> was created by <code>eksctl</code>.</p>
+<pre><code class="language-bash"># renovate: datasource=helm depName=cert-manager registryUrl=https://charts.jetstack.io
+CERT_MANAGER_HELM_CHART_VERSION="1.15.1"
+
+helm repo add --force-update jetstack https://charts.jetstack.io
+helm upgrade --install --version "${CERT_MANAGER_HELM_CHART_VERSION}" --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager &lt;&lt; EOF
+installCRDs: true
+serviceAccount:
+  create: false
+  name: cert-manager
+extraArgs:
+  - --enable-certificate-owner-ref=true
+EOF
+</code></pre>
+<p>Add ClusterIssuers for Let's Encrypt staging and production:</p>
+<pre><code class="language-bash">kubectl apply -f - &lt;&lt; EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-dns
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ${MY_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-staging-dns
+    solvers:
+      - selector:
+          dnsZones:
+            - ${CLUSTER_FQDN}
+        dns01:
+          route53:
+            region: ${AWS_DEFAULT_REGION}
+---
+# Create ClusterIssuer for production to get real signed certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production-dns
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${MY_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-production-dns
+    solvers:
+      - selector:
+          dnsZones:
+            - ${CLUSTER_FQDN}
+        dns01:
+          route53:
+            region: ${AWS_DEFAULT_REGION}
+EOF
+
+kubectl wait --namespace cert-manager --timeout=10m --for=condition=Ready clusterissuer --all
+</code></pre>
+<h2 id="external-dns"><a class="header" href="#external-dns">external-dns</a></h2>
+<p>Install <code>external-dns</code>
+<a href="https://artifacthub.io/packages/helm/bitnami/external-dns">helm chart</a>
+and modify the
+<a href="https://github.com/bitnami/charts/blob/master/bitnami/external-dns/values.yaml">default values</a>.
+<code>external-dns</code> will take care about DNS records.
+Service account <code>external-dns</code> was created by <code>eksctl</code>.</p>
+<pre><code class="language-bash"># renovate: datasource=helm depName=external-dns registryUrl=https://charts.bitnami.com/bitnami
+EXTERNAL_DNS_HELM_CHART_VERSION="6.38.0"
+
+helm repo add --force-update bitnami https://charts.bitnami.com/bitnami
+helm upgrade --install --version "${EXTERNAL_DNS_HELM_CHART_VERSION}" --namespace external-dns --wait --values - external-dns bitnami/external-dns &lt;&lt; EOF
+aws:
+  region: ${AWS_DEFAULT_REGION}
+domainFilters:
+  - ${CLUSTER_FQDN}
+interval: 20s
+policy: sync
+serviceAccount:
+  create: false
+  name: external-dns
+EOF
+</code></pre>
+<h2 id="ingress-nginx"><a class="header" href="#ingress-nginx">ingress-nginx</a></h2>
+<p>Install <code>ingress-nginx</code>
+<a href="https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx">helm chart</a>
+and modify the
+<a href="https://github.com/kubernetes/ingress-nginx/blob/master/charts/ingress-nginx/values.yaml">default values</a>.</p>
+<pre><code class="language-bash"># renovate: datasource=helm depName=ingress-nginx registryUrl=https://kubernetes.github.io/ingress-nginx
+INGRESS_NGINX_HELM_CHART_VERSION="4.10.1"
+
+helm repo add --force-update ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm upgrade --install --version "${INGRESS_NGINX_HELM_CHART_VERSION}" --namespace ingress-nginx --create-namespace --wait --values - ingress-nginx ingress-nginx/ingress-nginx &lt;&lt; EOF
+controller:
+  replicaCount: 2
+  watchIngressWithoutClass: true
+  service:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "$(echo "${TAGS}" | tr " " ,)"
+EOF
+</code></pre>
+<h2 id="rancher"><a class="header" href="#rancher">Rancher</a></h2>
+<p>Create Let's Encrypt certificate (using Route53):</p>
+<pre><code class="language-bash">kubectl get namespace cattle-system &amp;&gt; /dev/null || kubectl create namespace cattle-system
+
+kubectl apply -f - &lt;&lt; EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+  namespace: cattle-system
+spec:
+  secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+  issuerRef:
+    name: letsencrypt-${LETSENCRYPT_ENVIRONMENT}-dns
+    kind: ClusterIssuer
+  commonName: "rancher.${CLUSTER_FQDN}"
+  dnsNames:
+    - "rancher.${CLUSTER_FQDN}"
+EOF
+
+kubectl wait --namespace cattle-system --for=condition=Ready --timeout=20m certificate "ingress-cert-${LETSENCRYPT_ENVIRONMENT}"
+</code></pre>
+<p>Prepare <code>tls-ca-additional</code> secret with Let's Encrypt staging certificate:</p>
+<pre><code class="language-bash">kubectl get -n cattle-system secret tls-ca &amp;&gt; /dev/null || kubectl -n cattle-system create secret generic tls-ca --from-literal=cacerts.pem="$(curl -sL https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem)"
+</code></pre>
+<p>Install <code>rancher-server</code>
+<a href="https://github.com/rancher/rancher/tree/master/chart">helm chart</a>
+and modify the
+<a href="https://github.com/rancher/rancher/blob/master/chart/values.yaml">default values</a>.</p>
+<pre><code class="language-bash"># renovate: datasource=helm depName=rancher registryUrl=https://releases.rancher.com/server-charts/latest
+RANCHER_HELM_CHART_VERSION="2.8.5"
+
+helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
+helm upgrade --install --version "v${RANCHER_HELM_CHART_VERSION}" --namespace cattle-system --wait --values - rancher rancher-latest/rancher &lt;&lt; EOF
+hostname: rancher.${CLUSTER_FQDN}
+ingress:
+  tls:
+    source: secret
+    secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+privateCA: true
+replicas: 1
+bootstrapPassword: "${MY_PASSWORD}"
+EOF
+</code></pre>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-03.md">Edit this page on GitHub.</a></footer><div style="break-before: page; page-break-before: always;"></div><h1 id="clean-up"><a class="header" href="#clean-up">Clean-up</a></h1>
+<p><img src="https://raw.githubusercontent.com/aws-samples/eks-workshop/65b766c494a5b4f5420b2912d8373c4957163541/static/images/cleanup.svg?sanitize=true" alt="Clean-up" title="Clean-up" /></p>
+<p>Install necessary software:</p>
+<pre><code class="language-bash">if command -v apt-get &amp;&gt; /dev/null; then
+  apt update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl jq sudo unzip &gt; /dev/null
+fi
+</code></pre>
+<p>Install <a href="https://eksctl.io/">eksctl</a>:</p>
+<pre><code class="language-bash">if ! command -v eksctl &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=eksctl lookupName=weaveworks/eksctl
+  EKSCTL_VERSION="0.97.0"
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v${EKSCTL_VERSION}/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+fi
+</code></pre>
+<p>Install <a href="https://aws.amazon.com/cli/">AWS CLI</a> binary:</p>
+<pre><code class="language-bash">if ! command -v aws &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=awscli lookupName=aws/aws-cli
+  AWSCLI_VERSION="2.7.1"
+  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
+  unzip -q -o /tmp/awscli.zip -d /tmp/
+  sudo /tmp/aws/install
+fi
+</code></pre>
+<p>Install <a href="https://github.com/kubernetes/kubectl">kubectl</a> binary:</p>
+<pre><code class="language-bash">if ! command -v kubectl &amp;&gt; /dev/null; then
+  # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?&lt;version&gt;.+)$
+  KUBECTL_VERSION="1.30.2"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&amp;/g")/amd64/kubectl"
+  sudo chmod a+x /usr/local/bin/kubectl
+fi
+</code></pre>
+<p>Set necessary variables and verify if all the necessary variables were set:</p>
+<pre><code class="language-bash"># AWS Region
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
+# Hostname / FQDN definitions
+export CLUSTER_FQDN="${CLUSTER_FQDN:-mgmt1.k8s.use1.dev.proj.aws.mylabs.dev}"
+export BASE_DOMAIN="${CLUSTER_FQDN#*.}"
+export CLUSTER_NAME="${CLUSTER_FQDN%%.*}"
+export KUBECONFIG="${PWD}/tmp/${CLUSTER_FQDN}/kubeconfig-${CLUSTER_NAME}.conf"
+
+: "${AWS_ACCESS_KEY_ID?}"
+: "${AWS_DEFAULT_REGION?}"
+: "${AWS_SECRET_ACCESS_KEY?}"
+: "${BASE_DOMAIN?}"
+: "${CLUSTER_FQDN?}"
+: "${CLUSTER_NAME?}"
+: "${KUBECONFIG?}"
+</code></pre>
+<p>Remove EKS cluster and created components:</p>
+<pre><code class="language-bash">if eksctl get cluster --name="${CLUSTER_NAME}" 2&gt; /dev/null; then
+  eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+  eksctl delete cluster --name="${CLUSTER_NAME}" --force
+fi
+</code></pre>
+<p>Remove orphan EC2 created by Karpenter:</p>
+<pre><code class="language-bash">while read -r EC2; do
+  echo "Removing EC2: ${EC2}"
+  aws ec2 terminate-instances --instance-ids "${EC2}"
+done &lt; &lt;(aws ec2 describe-instances --filters "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" Name=instance-state-name,Values=running --query "Reservations[].Instances[].InstanceId" --output text)
+</code></pre>
+<p>Remove orphan ELBs, NLBs (if exists):</p>
+<pre><code class="language-bash"># Remove Network ELBs
+while read -r NETWORK_ELB_ARN; do
+  if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+    echo "Deleting Network ELB: ${NETWORK_ELB_ARN}"
+    aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
+  fi
+done &lt; &lt;(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text)
+
+# Remove Classic ELBs
+while read -r CLASSIC_ELB_NAME; do
+  if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+    echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
+    aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
+  fi
+done &lt; &lt;(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text)
+</code></pre>
+<p>Remove Route 53 DNS records from DNS Zone:</p>
+<pre><code class="language-bash">CLUSTER_FQDN_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
+if [[ -n "${CLUSTER_FQDN_ZONE_ID}" ]]; then
+  aws route53 list-resource-record-sets --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" | jq -c '.ResourceRecordSets[] | select (.Type != "SOA" and .Type != "NS")' |
+    while read -r RESOURCERECORDSET; do
+      aws route53 change-resource-record-sets \
+        --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" \
+        --change-batch '{"Changes":[{"Action":"DELETE","ResourceRecordSet": '"${RESOURCERECORDSET}"' }]}' \
+        --output text --query 'ChangeInfo.Id'
+    done
+fi
+</code></pre>
+<p>Remove CloudFormation stacks:</p>
+<pre><code class="language-bash">aws cloudformation delete-stack --stack-name "${CLUSTER_NAME}-route53"
+</code></pre>
+<p>Remove Volumes and Snapshots related to the cluster:</p>
+<pre><code class="language-bash">while read -r VOLUME; do
+  echo "Removing Volume: ${VOLUME}"
+  aws ec2 delete-volume --volume-id "${VOLUME}"
+done &lt; &lt;(aws ec2 describe-volumes --filters "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Volumes[].VolumeId' --output text)
+
+while read -r SNAPSHOT; do
+  echo "Removing Snapshot: ${SNAPSHOT}"
+  aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
+done &lt; &lt;(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Snapshots[].SnapshotId' --output text)
+</code></pre>
+<p>Wait for all CloudFormation stacks to be deleted:</p>
+<pre><code class="language-bash">aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_NAME}-route53"
+aws cloudformation wait stack-delete-complete --stack-name "eksctl-${CLUSTER_NAME}-cluster"
+</code></pre>
+<p>Remove <code>tmp/${CLUSTER_FQDN}</code> directory:</p>
+<pre><code class="language-bash">rm -rf "tmp/${CLUSTER_FQDN}"
+</code></pre>
+<p>Clean-up completed:</p>
+<pre><code class="language-bash">echo "Cleanup completed..."
+</code></pre>
+<footer id="open-on-gh">Found a bug? <a href="https://github.com/ruzickap/k8s-eks-rancher/edit/main/docs/src/part-cleanup.md">Edit this page on GitHub.</a></footer>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
